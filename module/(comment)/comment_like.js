@@ -1,6 +1,7 @@
 const { resourceTypeMap } = require('../../util/config.json')
-// 点赞与取消点赞评论
+const { APP_CONF } = require('../../util/config.json')
 
+// 点赞与取消点赞评论
 const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   query.t = query.t == 1 ? 'like' : 'unlike'
@@ -8,6 +9,7 @@ module.exports = (query, request) => {
   const data = {
     threadId: query.type + query.id,
     commentId: query.cid,
+    checkToken: query.checkToken || APP_CONF.checkToken,
   }
   if (query.type == 'A_EV_2_') {
     data.threadId = query.threadId

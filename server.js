@@ -66,7 +66,7 @@ async function getModulesDefinitions(
   specificRoute,
   doRequire = true,
 ) {
-  const modules = [];
+  const modules = []
 
   /**
    * 递归扫描目录内部函数
@@ -80,50 +80,50 @@ async function getModulesDefinitions(
    * @param {string} basePrefix 累加的 URL 路由前缀
    */
   async function scanDir(currentDir, basePrefix = '/') {
-    const files = await fs.promises.readdir(currentDir);
+    const files = await fs.promises.readdir(currentDir)
 
     for (const file of files) {
-      const fullPath = path.join(currentDir, file);
-      const stat = await fs.promises.stat(fullPath);
+      const fullPath = path.join(currentDir, file)
+      const stat = await fs.promises.stat(fullPath)
 
       if (stat.isDirectory()) {
         // 判断是否是路由组，例如 "(search)"
-        const isGroup = file.startsWith('(') && file.endsWith(')');
+        const isGroup = file.startsWith('(') && file.endsWith(')')
 
         // 工程化细节：URL 路径拼接必须用 path.posix.join，防止在 Windows 下生成 \ 斜杠
         const nextPrefix = isGroup
           ? basePrefix
-          : path.posix.join(basePrefix, file);
+          : path.posix.join(basePrefix, file)
 
         // 递归进入子目录
-        await scanDir(fullPath, nextPrefix);
+        await scanDir(fullPath, nextPrefix)
       } else if (file.endsWith('.js')) {
-        const identifier = file.split('.').shift();
-        let route;
+        const identifier = file.split('.').shift()
+        let route
 
         // 1. 优先检查是否有特殊写死的路由映射
         if (specificRoute && file in specificRoute) {
-          route = specificRoute[file];
+          route = specificRoute[file]
         } else {
           // 2. 正常处理逻辑：文件名下划线转斜杠
-          const fileRoutePath = identifier.replace(/_/g, '/');
+          const fileRoutePath = identifier.replace(/_/g, '/')
           // 将文件夹前缀和文件路由拼接，并确保多余的斜杠被清理
-          route = path.posix.join(basePrefix, fileRoutePath);
+          route = path.posix.join(basePrefix, fileRoutePath)
         }
 
-        const moduleDef = doRequire ? require(fullPath) : fullPath;
+        const moduleDef = doRequire ? require(fullPath) : fullPath
 
         // 将结果推入数组，保持和原先一样的数据结构
-        modules.push({ identifier, route, module: moduleDef });
+        modules.push({ identifier, route, module: moduleDef })
       }
     }
   }
 
   // 从根目录开始执行扫描
-  await scanDir(modulesPath);
+  await scanDir(modulesPath)
 
   // 保持原有的逆序习惯
-  return modules.reverse();
+  return modules.reverse()
 }
 
 /**
@@ -200,14 +200,14 @@ async function consturctServer(moduleDefs) {
    */
   app.use((req, _, next) => {
     req.cookies = {}
-      //;(req.headers.cookie || '').split(/\s*;\s*/).forEach((pair) => { //  Polynomial regular expression //
-      ; (req.headers.cookie || '').split(/;\s+|(?<!\s)\s+$/g).forEach((pair) => {
-        let crack = pair.indexOf('=')
-        if (crack < 1 || crack == pair.length - 1) return
-        req.cookies[decode(pair.slice(0, crack)).trim()] = decode(
-          pair.slice(crack + 1),
-        ).trim()
-      })
+    //;(req.headers.cookie || '').split(/\s*;\s*/).forEach((pair) => { //  Polynomial regular expression //
+    ;(req.headers.cookie || '').split(/;\s+|(?<!\s)\s+$/g).forEach((pair) => {
+      let crack = pair.indexOf('=')
+      if (crack < 1 || crack == pair.length - 1) return
+      req.cookies[decode(pair.slice(0, crack)).trim()] = decode(
+        pair.slice(crack + 1),
+      ).trim()
+    })
     next()
   })
 
@@ -405,7 +405,6 @@ async function serveNcmApi(options) {
   /** @type {import('express').Express & ExpressExtension} */
   const appExt = app
   appExt.server = app.listen(port, host, () => {
-
     console.log(`\x1b[31m
     ███╗   ██╗███████╗████████╗███████╗ █████╗ ███████╗███████╗  █████╗ ██████╗ ██╗
     ████╗  ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝██╔════╝ ██╔══██╗██╔══██╗██║
@@ -419,8 +418,7 @@ async function serveNcmApi(options) {
     - Server started successfully @ http://${host ? host : 'localhost'}:${port}
     - Environment: ${process.env.NODE_ENV || 'development'}
     - Node Version: ${process.version}
-    - Process ID: ${process.pid}`
-    )
+    - Process ID: ${process.pid}`)
   })
 
   return appExt

@@ -1,5 +1,6 @@
-// 对某一首歌曲发表评论
+const { APP_CONF } = require('../../util/config.json')
 
+// 对某一首歌曲发表评论
 const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   const data = {
@@ -9,7 +10,12 @@ module.exports = (query, request) => {
     resourceId: '0',
     expressionPicId: '-1',
     bubbleId: '-1',
-    checkToken: '',
+    checkToken: query.checkToken || APP_CONF.checkToken,
   }
-  return request('/api/resource/comments/add', data, createOption(query))
+
+  return request(
+    '/api/resource/comments/add',
+    data,
+    createOption(query, 'weapi'),
+  )
 }

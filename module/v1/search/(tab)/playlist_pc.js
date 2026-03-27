@@ -1,4 +1,4 @@
-const createOption = require("../../../../util/option.js");
+const createOption = require('../../../../util/option.js')
 
 module.exports = (query, request) => {
   const data = {
@@ -9,8 +9,8 @@ module.exports = (query, request) => {
   }
 
   return request(
-    "/api/v1/search/playlist/get",
+    '/api/v1/search/playlist/get',
     data,
-    createOption(query, "weapi")
+    createOption(query, 'weapi'),
   )
 }

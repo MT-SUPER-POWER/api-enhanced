@@ -1,4 +1,4 @@
-const createOption = require("../../../../util/option.js");
+const createOption = require('../../../../util/option.js')
 
 module.exports = (query, request) => {
   const data = {
@@ -8,9 +8,5 @@ module.exports = (query, request) => {
     queryCorrect: query.queryCorrect || true,
   }
 
-  return request(
-    "/api/v1/search/album/get",
-    data,
-    createOption(query, "weapi")
-  )
+  return request('/api/v1/search/album/get', data, createOption(query, 'weapi'))
 }
