@@ -1,4 +1,7 @@
 # 更新日志
+### 4.30.3 | 2026.06.20
+- chore: update packaged backend entry for desktop client install verification
+
 ### 4.30.2 | 2026.02.22
 - feat(cloud): 添加云盘上传模式选择功能并优化上传配置 (#116)
 - refactor: Refactor random Chinese IP generator (#110)
