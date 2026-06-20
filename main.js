@@ -12,14 +12,27 @@ if (!fs.existsSync(anonymousTokenPath)) {
 let obj = {}
 
 const modulePath = path.join(__dirname, 'module')
-const moduleFiles = fs.readdirSync(modulePath).reverse()
+
+function walkModuleDir(dir) {
+  const result = []
+  for (const file of fs.readdirSync(dir)) {
+    const fullPath = path.join(dir, file)
+    const stat = fs.statSync(fullPath)
+    if (stat.isDirectory()) {
+      result.push(...walkModuleDir(fullPath))
+    } else if (file.endsWith('.js')) {
+      result.push(fullPath)
+    }
+  }
+  return result
+}
+
+const moduleFiles = walkModuleDir(modulePath).reverse()
 
 let requestModule = null
 
-moduleFiles.forEach((file) => {
-  if (!file.endsWith('.js')) return
-
-  const filePath = path.join(modulePath, file)
+moduleFiles.forEach((filePath) => {
+  const file = path.basename(filePath)
   let fileModule = require(filePath)
   let fn = file.split('.').shift() || ''
 
