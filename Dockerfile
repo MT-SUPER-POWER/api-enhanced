@@ -11,6 +11,6 @@ COPY --chown=node:node . ./
 
 RUN yarn --network-timeout=100000
 
-EXPOSE 3000
+EXPOSE 3838
 
 CMD [ "/sbin/tini", "--", "node", "app.js" ]
