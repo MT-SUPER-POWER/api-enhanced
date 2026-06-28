@@ -13,8 +13,8 @@ async function start() {
   const generateConfig = require('./generateConfig')
   await generateConfig()
 
-  // NOTE: 端口优先级: 环境变量 PORT > 外部配置文件 > 默认 3838
-  let configPort = Number.parseInt(process.env.PORT || '', 10)
+  // NOTE: 后端端口的位置
+  let configPort = Number.parseInt(process.env.PORT, 3838)
   if (!Number.isFinite(configPort) || configPort <= 0) {
     configPort = 3838
     const configPath =
