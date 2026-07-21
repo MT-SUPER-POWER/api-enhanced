@@ -2,6 +2,7 @@ name: Upstream Sync
 
 permissions:
   contents: write
+  pull-requests: write
 
 on:
   schedule:
@@ -10,27 +11,59 @@ on:
 
 jobs:
   sync_latest_from_upstream:
-    name: Sync latest commits from upstream repo
+    name: Publish upstream sync pull request
     runs-on: ubuntu-latest
     if: ${{ github.event.repository.fork }}
 
     steps:
-      # Step 1: run a standard checkout action
       - name: Checkout target repo
         uses: actions/checkout@v6
-
-      # Step 2: run the sync action
-      - name: Sync upstream changes
-        id: sync
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.3
         with:
-          upstream_sync_repo: NeteaseCloudMusicApiEnhanced/api-enhanced
-          upstream_sync_branch: main
-          target_sync_branch: main
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Sync check
-        if: failure()
+      - name: Publish or update upstream sync pull request
+        id: sync
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.repository.default_branch }}
+          UPSTREAM_REPOSITORY: NeteaseCloudMusicApiEnhanced/api-enhanced
+          UPSTREAM_BRANCH: main
+          SYNC_BRANCH: sync/upstream-main
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "[Error] Due to a change in the workflow file of the upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork."
-          exit 1
+          set -euo pipefail
+
+          git remote add upstream "https://github.com/${UPSTREAM_REPOSITORY}.git"
+          git fetch --no-tags origin "${TARGET_BRANCH}"
+          git fetch --no-tags upstream "${UPSTREAM_BRANCH}"
+
+          upstream_sha="$(git rev-parse "upstream/${UPSTREAM_BRANCH}")"
+          short_sha="${upstream_sha:0:12}"
+
+          if git merge-base --is-ancestor "${upstream_sha}" "origin/${TARGET_BRANCH}"; then
+            echo "Upstream ${UPSTREAM_BRANCH} is already contained in ${TARGET_BRANCH}." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if git ls-remote --exit-code --heads origin "refs/heads/${SYNC_BRANCH}" > /dev/null; then
+            git fetch origin "refs/heads/${SYNC_BRANCH}:refs/remotes/origin/${SYNC_BRANCH}"
+          fi
+          git push --force-with-lease="refs/heads/${SYNC_BRANCH}" origin "${upstream_sha}:refs/heads/${SYNC_BRANCH}"
+
+          pr_title="chore(sync): upstream ${UPSTREAM_BRANCH} @ ${short_sha}"
+          printf -v pr_body 'Automated update from %s@%s.\n\nThis pull request is never merged automatically.' "${UPSTREAM_REPOSITORY}" "${upstream_sha}"
+          pr_url="$(gh pr list --repo "${GITHUB_REPOSITORY}" --base "${TARGET_BRANCH}" --head "${SYNC_BRANCH}" --state open --json url --jq '.[0].url // empty')"
+
+          if [[ -n "${pr_url}" ]]; then
+            gh pr edit "${pr_url}" --repo "${GITHUB_REPOSITORY}" --title "${pr_title}" --body "${pr_body}"
+          else
+            pr_url="$(gh pr create --repo "${GITHUB_REPOSITORY}" --base "${TARGET_BRANCH}" --head "${SYNC_BRANCH}" --title "${pr_title}" --body "${pr_body}")"
+          fi
+
+          {
+            echo "## Upstream sync pull request"
+            echo
+            echo "- Branch: \`${SYNC_BRANCH}\`"
+            echo "- Upstream commit: \`${upstream_sha}\`"
+            echo "- Pull request: ${pr_url}"
+          } >> "$GITHUB_STEP_SUMMARY"
