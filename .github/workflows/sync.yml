@@ -1,7 +1,7 @@
 name: Upstream Sync
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 on:
@@ -16,40 +16,54 @@ jobs:
     if: ${{ github.event.repository.fork }}
 
     steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: Publish or update upstream sync pull request
         id: sync
         shell: bash
         env:
           TARGET_BRANCH: ${{ github.event.repository.default_branch }}
-          UPSTREAM_OWNER: NeteaseCloudMusicApiEnhanced
           UPSTREAM_REPOSITORY: NeteaseCloudMusicApiEnhanced/api-enhanced
           UPSTREAM_BRANCH: main
+          SYNC_BRANCH: sync/upstream-main
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          upstream_sha="$(gh api "repos/${UPSTREAM_REPOSITORY}/commits/${UPSTREAM_BRANCH}" --jq '.sha')"
+          git remote add upstream "https://github.com/${UPSTREAM_REPOSITORY}.git"
+          git fetch --no-tags origin "${TARGET_BRANCH}"
+          git fetch --no-tags upstream "${UPSTREAM_BRANCH}"
+
+          upstream_sha="$(git rev-parse "upstream/${UPSTREAM_BRANCH}")"
           short_sha="${upstream_sha:0:12}"
-          pr_head="${UPSTREAM_OWNER}:${UPSTREAM_BRANCH}"
+
+          if git merge-base --is-ancestor "${upstream_sha}" "origin/${TARGET_BRANCH}"; then
+            echo "Upstream ${UPSTREAM_BRANCH} is already contained in ${TARGET_BRANCH}." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if git ls-remote --exit-code --heads origin "refs/heads/${SYNC_BRANCH}" > /dev/null; then
+            git fetch origin "refs/heads/${SYNC_BRANCH}:refs/remotes/origin/${SYNC_BRANCH}"
+          fi
+          git push --force-with-lease="refs/heads/${SYNC_BRANCH}" origin "${upstream_sha}:refs/heads/${SYNC_BRANCH}"
+
           pr_title="chore(sync): upstream ${UPSTREAM_BRANCH} @ ${short_sha}"
           printf -v pr_body 'Automated update from %s@%s.\n\nThis pull request is never merged automatically.' "${UPSTREAM_REPOSITORY}" "${upstream_sha}"
-          pr_url="$(gh pr list --repo "${GITHUB_REPOSITORY}" --base "${TARGET_BRANCH}" --head "${pr_head}" --state open --json url --jq '.[0].url // empty')"
+          pr_url="$(gh pr list --repo "${GITHUB_REPOSITORY}" --base "${TARGET_BRANCH}" --head "${SYNC_BRANCH}" --state open --json url --jq '.[0].url // empty')"
 
           if [[ -n "${pr_url}" ]]; then
             gh pr edit "${pr_url}" --repo "${GITHUB_REPOSITORY}" --title "${pr_title}" --body "${pr_body}"
           else
-            ahead_by="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${TARGET_BRANCH}...${pr_head}" --jq '.ahead_by')"
-            if [[ "${ahead_by}" == "0" ]]; then
-              echo "Upstream ${UPSTREAM_BRANCH} is already contained in ${TARGET_BRANCH}." | tee -a "$GITHUB_STEP_SUMMARY"
-              exit 0
-            fi
-            pr_url="$(gh pr create --repo "${GITHUB_REPOSITORY}" --base "${TARGET_BRANCH}" --head "${pr_head}" --title "${pr_title}" --body "${pr_body}")"
+            pr_url="$(gh pr create --repo "${GITHUB_REPOSITORY}" --base "${TARGET_BRANCH}" --head "${SYNC_BRANCH}" --title "${pr_title}" --body "${pr_body}")"
           fi
 
           {
             echo "## Upstream sync pull request"
             echo
-            echo "- Source branch: \`${pr_head}\`"
+            echo "- Branch: \`${SYNC_BRANCH}\`"
             echo "- Upstream commit: \`${upstream_sha}\`"
             echo "- Pull request: ${pr_url}"
           } >> "$GITHUB_STEP_SUMMARY"
