@@ -113,8 +113,7 @@
     "pkg": "^5.8.1",
     "power-assert": "^1.6.1",
     "prettier": "^3.9.6",
-    "typescript": "^5.9.3",
-    "@types/bun": "latest"
+    "typescript": "^5.9.3"
   },
   "private": true,
   "publishConfig": {
