@@ -1,6 +1,6 @@
 // 发送安全验证码
 
-const createOption = require('../util/option.js')
+const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   const data = {
     ctcode: query.ctcode || '86',

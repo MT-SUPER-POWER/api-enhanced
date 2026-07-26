@@ -1,6 +1,6 @@
 // 黑胶乐签打卡详情
 
-const createOption = require('../util/option.js')
+const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   const data = {
     signDayTime: query.timestamp,

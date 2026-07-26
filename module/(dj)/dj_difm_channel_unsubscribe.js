@@ -1,6 +1,6 @@
 // DIFM电台 - 取消收藏频道
 
-const createOption = require('../util/option.js')
+const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   const data = {
     id: query.id,

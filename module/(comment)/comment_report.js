@@ -1,6 +1,6 @@
 // 举报评论
 
-const createOption = require('../util/option.js')
+const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   const data = {
     threadId: 'R_SO_4_' + query.id,

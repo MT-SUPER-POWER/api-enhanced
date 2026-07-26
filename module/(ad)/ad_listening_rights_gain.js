@@ -4,7 +4,7 @@
 // 2. 调用本接口传入 reqUid 及相关权益参数，领取免费听权益
 // 3. 服务器返回 gainFlag 等标识，用于展示领取结果
 
-const createOption = require('../util/option.js')
+const createOption = require('../../util/option.js')
 const adGet = require('./ad_get.js')
 
 module.exports = async (query, request) => {

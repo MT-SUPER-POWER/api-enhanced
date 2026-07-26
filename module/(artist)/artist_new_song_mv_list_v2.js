@@ -1,6 +1,6 @@
 // 获取关注歌手的新歌曲和 MV
 
-const createOption = require('../util/option.js')
+const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   const data = {
     startTimestamp: query.startTimestamp || query.before || Date.now(),

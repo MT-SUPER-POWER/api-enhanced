@@ -17,27 +17,6 @@ async function start() {
   let configPort = Number.parseInt(process.env.PORT, 3838)
   if (!Number.isFinite(configPort) || configPort <= 0) {
     configPort = 3838
-    const configPath =
-      process.env.APP_CONFIG_PATH ||
-      path.resolve(__dirname, '../../config/app.config.yml')
-    const defaultPath = path.resolve(
-      __dirname,
-      '../../config/app.config.default.yml',
-    )
-    const actualPath = fs.existsSync(configPath) ? configPath : defaultPath
-
-    try {
-      const yaml = require('js-yaml')
-      const cfg = yaml.load(fs.readFileSync(actualPath, 'utf-8'))
-      if (cfg && cfg.backend && cfg.backend.port) {
-        configPort = cfg.backend.port
-      }
-    } catch (e) {
-      console.error(
-        '[Backend] Failed to load port from config, using default 3838:',
-        e.message,
-      )
-    }
   }
 
   require('./server').serveNcmApi({

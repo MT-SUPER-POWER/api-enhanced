@@ -4,8 +4,8 @@
 // 可按需修改此 API 的代码
 /* {"extInfo":"{\"lastRequestTimestamp\":1692358373509,\"lbsInfoList\":[{\"lat\":40.23076381,\"lon\":129.07545186,\"time\":1692358543},{\"lat\":40.23076381,\"lon\":129.07545186,\"time\":1692055283}],\"listenedTs\":false,\"noAidjToAidj\":true}","header":"{}"} */
 
-const logger = require('../util/logger.js')
-const createOption = require('../util/option.js')
+const logger = require('../../util/logger.js')
+const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   var extInfo = {}
   if (query.latitude != undefined) {

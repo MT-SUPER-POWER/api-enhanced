@@ -1,7 +1,7 @@
-const { resourceTypeMap } = require('../util/config.json')
+const { resourceTypeMap } = require('../../util/config.json')
 // 发送评论
 
-const createOption = require('../util/option.js')
+const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   const data = {
     threadId: resourceTypeMap[query.type] + query.id,

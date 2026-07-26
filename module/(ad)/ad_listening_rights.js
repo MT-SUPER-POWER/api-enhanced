@@ -1,6 +1,6 @@
 // 获取免费听时长状态
 
-const createOption = require('../util/option.js')
+const createOption = require('../../util/option.js')
 module.exports = (query, request) => {
   const data = {
     entrance: 'FREE_LISTEN_RN',
