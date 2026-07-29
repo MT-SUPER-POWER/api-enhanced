@@ -4,7 +4,7 @@ module.exports = (query, request) => {
     keyword: query.keyword || '',
     scene: 'normal',
     limit: query.limit || '10',
-    offset: query.offset || '30',
+    offset: query.offset || '0',
     e_r: true,
   }
   return request(`/api/search/voicelist/get`, data, createOption(query))
