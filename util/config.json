@@ -17,7 +17,7 @@
     "clDomian": "https://clientlog.music.163.com",
     "clDomian3": "https://clientlog3.music.163.com",
     "dunDomainV3": "https://ac.dun.163yun.com",
-    "dunDomainV2": "https://ac.dun.163.com",
+    "dunStaticDomain": "https://acstatic-dun.126.net",
     "encrypt": true,
     "encryptResponse": false,
     "clientSign": "FC:34:97:DC:E7:20@@@453832335F384641365F424635335F303030315F303031425F343438425F344437335F313934382@@@@@@181abaa8795545d381c5839a5e4dad902f095f6d23692e552cd300c89e67cff8",

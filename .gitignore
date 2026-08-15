@@ -10,5 +10,4 @@ anonymous_token
 .vercel
 .env
 IFLOW.md
-pnpm-lock.yaml
-pnpm-workspace.yaml
+precompiled
