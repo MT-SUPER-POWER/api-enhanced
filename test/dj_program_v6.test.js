@@ -24,7 +24,9 @@ describe('dj program v6 module', function () {
       undefined,
       false,
     )
-    const definition = moduleDefinitions.find(({ identifier }) => identifier === 'dj_program_v6')
+    const definition = moduleDefinitions.find(
+      ({ identifier }) => identifier === 'dj_program_v6',
+    )
 
     assert.strictEqual(definition?.route, '/dj/program/v6')
   })

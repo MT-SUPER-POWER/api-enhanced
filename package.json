@@ -51,8 +51,9 @@
     "url": "https://github.com/NeteaseCloudMusicApiEnhanced/api-enhanced/issues"
   },
   "homepage": "https://neteasecloudmusicapienhanced.js.org/",
+  "packageManager": "pnpm@9.15.4",
   "engines": {
-    "node": ">=12"
+    "node": ">=18"
   },
   "lint-staged": {
     "*.js": [
