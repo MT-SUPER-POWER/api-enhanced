@@ -297,6 +297,21 @@ async function constructServer(moduleDefs) {
   )
 
   /**
+   * ===== Yidun =====
+   * 静态资源放行与 /api/yidun 兼容重写
+   */
+  app.use('/api/yidun', (req, res, next) => {
+    req.url = `/yidun${req.url}`
+    app.handle(req, res, next)
+  })
+
+  app.use('/yidun', (req, res, next) =>
+    /^\/(yidun-slider_v1|login-client_v1)\.js$/.test(req.path)
+      ? express.static(path.join(__dirname, 'util', 'yidun'))(req, res, next)
+      : next(),
+  )
+
+  /**
    * Cache
    */
   app.use(cache('2 minutes', (_, res) => res.statusCode === 200))
