@@ -380,6 +380,145 @@ body {
 
 调用登录接口的速度比调用其他接口慢 , 因为登录过程调用了加密算法
 
+### 易盾密码登录与二次验证
+
+说明 : 网易云密码登录常触发网易易盾滑块验证（8821）与短信二阶段验证（8830）。本组接口提供完整的会话票据管理、滑块票据暂存及二次验证能力，并在 `/yidun/` 静态目录下提供浏览器端即用组件脚本。详细使用说明可参考仓库 `yidun/README.md` 与 `yidun/UA与OS.md`。
+
+#### 1. 易盾密码 / 短信登录
+
+说明 : 支持密码登录与二阶段短信验证登录。遇到滑块（8821）时，带上滑块 validate 或调用 `/yidun/sca` 暂存后重试；进入二阶段（8830）后，填入收到的短信验证码再次调用即可完成登录。
+
+**必选参数 :**
+
+`phone`: 手机号码
+
+`password`: 密码（与 `captcha` 二选一）
+
+`captcha`: 短信验证码（二阶段验证时使用）
+
+**可选参数 :**
+
+`countrycode`: 国家码，默认 `86`
+
+`sid`: 会话标识，用于关联整个滑块与二阶段流程，默认 `default`
+
+`sca`: 滑块验证通过拿到的 validate 字符串（若已通过 `/yidun/sca` 暂存可不传）
+
+`tu`: 二阶段票据 `MUSIC_TU`（同一 sid 会话下服务端会自动管理，一般无需手动传）
+
+`restart`: 设为 `true` 时放弃当前未完成的二阶段状态，重置回第一阶段密码登录
+
+**接口地址 :** `/yidun/login`（也兼容 `/api/yidun/login`）
+
+**调用例子 :**
+
+- 密码登录（第一阶段）：`/yidun/login?phone=13800000000&password=xxx&sid=my_sid`
+- 滑块通过后重试：`/yidun/login?phone=13800000000&password=xxx&sid=my_sid&sca=CN31_xxx`
+- 填入短信码（第二阶段）：`/yidun/login?phone=13800000000&captcha=123456&sid=my_sid`
+
+
+#### 2. 易盾发送短信验证码
+
+说明 : 在易盾会话中发送短信验证码（eapi 接口），配合验证码登录或二阶段登录使用。若遇滑块风控拦截（8821），可传入滑块校验通过后的 `sca` 重试。
+
+**必选参数 :**
+
+`phone`: 手机号码
+
+**可选参数 :**
+
+`ctcode`: 国家区号，默认 `86`
+
+`sid`: 会话标识，默认 `default`
+
+`sca`: 易盾滑块通过后返回的 validate 字符串（发码触发风控时使用）
+
+**接口地址 :** `/yidun/send`（也兼容 `/api/yidun/send`）
+
+**调用例子 :** `/yidun/send?phone=13800000000&sid=my_sid`
+
+#### 3. 暂存滑块凭证 (SCA)
+
+说明 : 暂存用户拖动易盾滑块获取到的 `validate`，在 3 分钟内登录无需重复拖滑块。
+
+**必选参数 :**
+
+`sca`: 易盾滑块通过后返回的 validate 字符串
+
+**可选参数 :**
+
+`sid`: 会话标识，默认 `default`
+
+**接口地址 :** `/yidun/sca`（也兼容 `/api/yidun/sca`）
+
+**调用例子 :** `/yidun/sca?sid=my_sid&sca=CN31_xxx`
+
+#### 4. 查询会话状态
+
+说明 : 查询指定 `sid` 会话当前是否持有有效 `sca`、二阶段 `MUSIC_TU` 凭证与设备指纹状态。
+
+**必选参数 :**
+
+`sid`: 会话标识
+
+**接口地址 :** `/yidun/state`（也兼容 `/api/yidun/state`）
+
+**调用例子 :** `/yidun/state?sid=my_sid`
+
+#### 5. 易盾 -462 风险挑战校验
+
+说明 : 调用业务接口遇到 `-462` 风险挑战时，将滑块通过的 validate 提交给网易云风控验证接口完成核验。
+
+**必选参数 :**
+
+`challenge`: 触发 `-462` 响应里的 `data` 挑战对象（JSON 字符串或对象）
+
+`validate`: 易盾滑块返回的 validate 字符串
+
+**可选参数 :**
+
+`captchaId`: 覆盖默认 captchaId
+
+**接口地址 :** `/yidun/verify/check`
+
+**调用例子 :** `/yidun/verify/check?validate=CN31_xxx&challenge={...}`
+
+#### 6. 前端静态开箱即用客户端
+
+在前端 HTML/Vue/React 页面中可直接静态引入以下开箱即用脚本（无需自行实现滑块与二次验证状态机）：
+
+- `/yidun/login-client_v1.js`: 一体化登录客户端（自动拉起滑块、暂存凭证并推进流程）
+- `/yidun/yidun-slider_v1.js`: 易盾官方滑块组件挂载与销毁封装
+
+
+```html
+<div id="yidun-cap"></div>
+<script type="module">
+  import { login, sendSms, newSid } from '/yidun/login-client_v1.js'
+
+  const sid = newSid()
+
+  // 1. 发起登录（遇到 8821 自动渲染滑块，拖完自动重试）
+  let r = await login({
+    phone: '13800000000',
+    password: 'your_password',
+    sid,
+    container: '#yidun-cap',
+  })
+
+  // 2. 收到 8830 表示滑块通过，调用发码并等待用户输入短信验证码
+  if (r.code === 8830) {
+    await sendSms({ phone: '13800000000', sid })
+    r = await login({ phone: '13800000000', captcha: '123456', sid })
+  }
+
+  // 3. 登录成功 (200)，拿到 Cookie
+  if (r.code === 200) {
+    console.log('登录成功 Cookie:', r.loginCookie)
+  }
+</script>
+```
+
 ### 刷新登录
 
 说明 : 调用此接口 , 可刷新登录状态,返回内容包含新的 cookie(不支持刷新二维码登录的 cookie)
@@ -709,7 +848,6 @@ name: 歌单名
 id: 歌单id
 
 tags: 歌单标签
-
 ```
 
 **接口地址 :** `/playlist/tags/update`
@@ -5923,7 +6061,6 @@ let data = encodeURIComponent(
    6: 动态
 
    7: 电台
-
    ```
 
    `id`: 对应资源 id

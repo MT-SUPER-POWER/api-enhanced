@@ -2916,3 +2916,45 @@ export function fans_group_user_group_detail(
     groupId: string | number
   } & RequestBaseConfig,
 ): Promise<Response>
+
+export function yidun_login(
+  params: {
+    phone: string
+    password?: string
+    captcha?: string
+    countrycode?: string
+    sid?: string
+    sca?: string
+    tu?: string
+    restart?: boolean
+  } & RequestBaseConfig,
+): Promise<Response>
+
+export function yidun_send(
+  params: {
+    phone: string
+    ctcode?: string
+    sid?: string
+  } & RequestBaseConfig,
+): Promise<Response>
+
+export function yidun_sca(
+  params: {
+    sid?: string
+    sca: string
+  } & RequestBaseConfig,
+): Promise<Response>
+
+export function yidun_state(
+  params: {
+    sid: string
+  } & RequestBaseConfig,
+): Promise<Response>
+
+export function yidun_verify_check(
+  params: {
+    challenge: Record<string, unknown> | string
+    validate: string
+    captchaId?: string
+  } & RequestBaseConfig,
+): Promise<Response>

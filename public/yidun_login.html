@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>易盾安全登录体验 — 网易云音乐 API Enhanced</title>
+  <style>
+    :root {
+      --primary: #c20c0c;
+      --primary-hover: #a10a0a;
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --muted: #7f8c8d;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 30px 20px;
+    }
+    .wrapper {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 8px;
+    }
+    .desc {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .tabs-nav {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+    .step-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #718096;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      transition: all 0.2s;
+    }
+    .step-item.active .step-circle {
+      background: var(--primary);
+      color: #fff;
+    }
+    .step-item.done .step-circle {
+      background: var(--success);
+      color: #fff;
+    }
+    .step-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .step-item.active .step-label {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 6px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+    input:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      width: 100%;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+    .btn-secondary {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    #yidun-cap {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+    }
+    .stage2-box {
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+    }
+    .stage2-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #b45309;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .log-box {
+      background: #1a202c;
+      color: #a0aec0;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .log-item {
+      margin-bottom: 4px;
+    }
+    .log-item.info { color: #63b3ed; }
+    .log-item.success { color: #68d391; }
+    .log-item.warn { color: #f6ad55; }
+    .log-item.error { color: #fc8181; }
+    .cookie-box {
+      margin-top: 14px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 14px;
+      display: none;
+    }
+    .cookie-text {
+      font-family: monospace;
+      font-size: 12px;
+      color: #166534;
+      word-break: break-all;
+      margin-bottom: 10px;
+    }
+    .hint-text {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1>易盾安全登录体验</h1>
+      <p class="desc">支持密码登录与短信验证码登录，完整体验 8821 滑块与 8830 二阶段二次验证全流程</p>
+    </header>
+
+    <div class="card">
+      <!-- 切换登录模式 Tab -->
+      <div class="tabs-nav">
+        <button type="button" class="tab-btn active" id="tab-password">密码登录</button>
+        <button type="button" class="tab-btn" id="tab-sms">短信验证码登录</button>
+      </div>
+
+      <!-- 流程步骤指示器 -->
+      <div class="steps">
+        <div class="step-item active" id="step-1">
+          <div class="step-circle">1</div>
+          <div class="step-label" id="step-1-label">密码验证</div>
+        </div>
+        <div class="step-item" id="step-2">
+          <div class="step-circle">2</div>
+          <div class="step-label">易盾滑块</div>
+        </div>
+        <div class="step-item" id="step-3">
+          <div class="step-circle">3</div>
+          <div class="step-label" id="step-3-label">二阶段短信</div>
+        </div>
+        <div class="step-item" id="step-4">
+          <div class="step-circle">4</div>
+          <div class="step-label">登录成功</div>
+        </div>
+      </div>
+
+      <!-- 手机号（两模式共享） -->
+      <div class="form-group">
+        <label for="phone">手机号</label>
+        <input type="text" id="phone" placeholder="请输入绑定的手机号" value="">
+      </div>
+
+      <!-- 密码登录区域 -->
+      <div id="section-password">
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" placeholder="请输入密码" value="">
+        </div>
+      </div>
+
+      <!-- 短信验证码登录区域 -->
+      <div id="section-sms" style="display: none;">
+        <div class="form-group">
+          <label for="sms-login-code">短信验证码</label>
+          <div class="input-row">
+            <input type="text" id="sms-login-code" placeholder="请输入 6 位短信验证码" maxlength="6">
+            <button type="button" class="btn btn-secondary" id="btn-send-sms-login">发送验证码</button>
+          </div>
+          <p class="hint-text">点击「发送验证码」后，短信将发至对应手机；若触发易盾风控将自动弹出滑块。</p>
+        </div>
+      </div>
+
+      <!-- 会话标识 sid -->
+      <div class="form-group">
+        <label for="sid">会话标识 (sid)</label>
+        <div class="input-row">
+          <input type="text" id="sid" readonly>
+          <button type="button" class="btn btn-secondary" id="btn-new-sid">重置会话</button>
+        </div>
+        <p class="hint-text">同一会话内共享滑块验证结果 (validate) 与二阶段凭证 (MUSIC_TU)。</p>
+      </div>
+
+      <!-- 提交登录按钮 -->
+      <button type="button" class="btn btn-primary" id="btn-login">立即登录</button>
+
+      <!-- 滑块挂载容器 -->
+      <div id="yidun-cap"></div>
+
+      <!-- 密码登录触发的二阶段短信验证区域 (8830) -->
+      <div class="stage2-box" id="stage2-box">
+        <div class="stage2-title">
+          <span>触发二阶段短信验证 (8830)</span>
+        </div>
+        <p style="font-size: 13px; color: #78350f; margin-bottom: 12px;">
+          滑块已校验通过！网易云风控要求进行二阶段短信二次验证，请点击「发送验证码」，输入收到的短信验证码后完成登录。
+        </p>
+        <div class="form-group">
+          <div class="input-row">
+            <input type="text" id="captcha-code" placeholder="请输入 6 位短信验证码" maxlength="6">
+            <button type="button" class="btn btn-secondary" id="btn-send-sms">发送验证码</button>
+          </div>
+        </div>
+        <div class="input-row">
+          <button type="button" class="btn btn-primary" id="btn-submit-captcha">提交验证码登录</button>
+          <button type="button" class="btn btn-secondary" id="btn-restart">放弃并重置</button>
+        </div>
+      </div>
+
+      <!-- 成功展示 Cookie -->
+      <div class="cookie-box" id="cookie-box">
+        <h4 style="color: #15803d; font-size: 14px; margin-bottom: 6px;">登录成功</h4>
+        <div class="cookie-text" id="cookie-text"></div>
+        <button type="button" class="btn btn-secondary" id="btn-copy-cookie">复制 Cookie</button>
+      </div>
+    </div>
+
+    <!-- 运行日志与进度 -->
+    <div class="card">
+      <h3 style="font-size: 15px; margin-bottom: 10px;">流程日志 (Event Log)</h3>
+      <div class="log-box" id="log-box"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { login, sendSms, newSid } from '/yidun/login-client_v1.js'
+
+    let currentMode = 'password' // 'password' | 'sms'
+
+    // DOM 元素
+    const tabPassword = document.getElementById('tab-password')
+    const tabSms = document.getElementById('tab-sms')
+    const sectionPassword = document.getElementById('section-password')
+    const sectionSms = document.getElementById('section-sms')
+    const step1Label = document.getElementById('step-1-label')
+    const step3Label = document.getElementById('step-3-label')
+
+    const phoneInput = document.getElementById('phone')
+    const passwordInput = document.getElementById('password')
+    const smsLoginCodeInput = document.getElementById('sms-login-code')
+    const btnSendSmsLogin = document.getElementById('btn-send-sms-login')
+
+    const sidInput = document.getElementById('sid')
+    const btnNewSid = document.getElementById('btn-new-sid')
+    const btnLogin = document.getElementById('btn-login')
+
+    const stage2Box = document.getElementById('stage2-box')
+    const btnSendSms = document.getElementById('btn-send-sms')
+    const captchaInput = document.getElementById('captcha-code')
+    const btnSubmitCaptcha = document.getElementById('btn-submit-captcha')
+    const btnRestart = document.getElementById('btn-restart')
+
+    const logBox = document.getElementById('log-box')
+    const cookieBox = document.getElementById('cookie-box')
+    const cookieText = document.getElementById('cookie-text')
+    const btnCopyCookie = document.getElementById('btn-copy-cookie')
+
+    // 初始化 sid
+    sidInput.value = newSid()
+
+    function setStep(step) {
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`step-${i}`)
+        el.className = 'step-item'
+        if (i < step) el.className = 'step-item done'
+        else if (i === step) el.className = 'step-item active'
+      }
+    }
+
+    function appendLog(msg, type = 'info') {
+      const time = new Date().toLocaleTimeString()
+      const div = document.createElement('div')
+      div.className = `log-item ${type}`
+      div.textContent = `[${time}] ${msg}`
+      logBox.appendChild(div)
+      logBox.scrollTop = logBox.scrollHeight
+    }
+
+    // 模式切换
+    tabPassword.addEventListener('click', () => {
+      if (currentMode === 'password') return
+      currentMode = 'password'
+      tabPassword.classList.add('active')
+      tabSms.classList.remove('active')
+      sectionPassword.style.display = 'block'
+      sectionSms.style.display = 'none'
+      step1Label.textContent = '密码验证'
+      step3Label.textContent = '二阶段短信'
+      stage2Box.style.display = 'none'
+      cookieBox.style.display = 'none'
+      setStep(1)
+      appendLog('已切换至「密码登录」模式', 'info')
+    })
+
+    tabSms.addEventListener('click', () => {
+      if (currentMode === 'sms') return
+      currentMode = 'sms'
+      tabSms.classList.add('active')
+      tabPassword.classList.remove('active')
+      sectionPassword.style.display = 'none'
+      sectionSms.style.display = 'block'
+      step1Label.textContent = '输入验证码'
+      step3Label.textContent = '接口校验'
+      stage2Box.style.display = 'none'
+      cookieBox.style.display = 'none'
+      setStep(1)
+      appendLog('已切换至「短信验证码登录」模式', 'info')
+    })
+
+    // 倒计时辅助函数
+    function startCountdown(button, defaultText) {
+      let count = 60
+      button.disabled = true
+      button.textContent = `${count}s`
+      const timer = setInterval(() => {
+        count--
+        if (count <= 0) {
+          clearInterval(timer)
+          button.textContent = defaultText
+          button.disabled = false
+        } else {
+          button.textContent = `${count}s`
+        }
+      }, 1000)
+    }
+
+    // 发送验证码通用逻辑
+    async function handleSendSms(button, defaultText) {
+      const phone = phoneInput.value.trim()
+      const sid = sidInput.value.trim()
+      if (!phone) {
+        alert('请输入手机号')
+        return
+      }
+
+      button.disabled = true
+      appendLog('正在发送短信验证码 (eapi)...', 'info')
+
+      try {
+        const res = await sendSms({
+          phone,
+          sid,
+          container: '#yidun-cap',
+          width: 320,
+          onReady: () => {
+            setStep(2)
+            appendLog('触发发码滑块验证，请拖动滑块完成验证！', 'warn')
+          },
+        })
+        if (res.code === 200) {
+          appendLog('短信验证码发送成功，请查收短信！', 'success')
+          startCountdown(button, defaultText)
+        } else {
+          appendLog(`验证码发送失败: ${res.msg || res.message || '未知错误'} (code: ${res.code})`, 'error')
+          button.disabled = false
+        }
+      } catch (e) {
+        appendLog('验证码发送请求失败: ' + e.message, 'error')
+        button.disabled = false
+      }
+    }
+
+    // 验证码模式下的「发送验证码」按钮
+    btnSendSmsLogin.addEventListener('click', () => {
+      handleSendSms(btnSendSmsLogin, '发送验证码')
+    })
+
+    // 二阶段模式下的「发送验证码」按钮
+    btnSendSms.addEventListener('click', () => {
+      handleSendSms(btnSendSms, '发送验证码')
+    })
+
+    // 重置会话
+    btnNewSid.addEventListener('click', () => {
+      sidInput.value = newSid()
+      stage2Box.style.display = 'none'
+      cookieBox.style.display = 'none'
+      setStep(1)
+      appendLog('会话已重置，生成新 sid: ' + sidInput.value, 'info')
+    })
+
+    // 主登录按钮点击
+    btnLogin.addEventListener('click', async () => {
+      const phone = phoneInput.value.trim()
+      const sid = sidInput.value.trim()
+
+      if (!phone) {
+        alert('请输入手机号')
+        return
+      }
+
+      const loginParams = {
+        phone,
+        sid,
+        container: '#yidun-cap',
+        width: 320,
+        onStage: (stage, payload) => {
+          switch (stage) {
+            case 'login':
+              appendLog(`提交${currentMode === 'sms' ? '短信验证码' : '密码'}认证...`, 'info')
+              break
+            case 'slider':
+              setStep(2)
+              appendLog(`触发易盾滑块 (code: ${payload.code})，正在挂载滑块组件...`, 'warn')
+              break
+            case 'slider-ready':
+              appendLog('易盾滑块渲染完成，请在下方拖动滑块！', 'info')
+              break
+            case 'retry':
+              appendLog(`滑块验证成功 (validate len: ${payload.sca})，自动带凭证重试...`, 'info')
+              break
+            case 'need-captcha':
+              setStep(3)
+              appendLog('收到 8830，滑块通过，进入二阶段短信验证！', 'warn')
+              break
+            case 'done':
+              setStep(4)
+              appendLog('登录成功 (200)！', 'success')
+              break
+            case 'error':
+              appendLog('滑块验证异常: ' + (payload && payload.message), 'error')
+              break
+          }
+        },
+      }
+
+      if (currentMode === 'password') {
+        const password = passwordInput.value.trim()
+        if (!password) {
+          alert('请输入密码')
+          return
+        }
+        loginParams.password = password
+      } else {
+        const captcha = smsLoginCodeInput.value.trim()
+        if (!captcha) {
+          alert('请输入收到的短信验证码（如未发送请先点击「发送验证码」）')
+          return
+        }
+        loginParams.captcha = captcha
+      }
+
+      btnLogin.disabled = true
+      cookieBox.style.display = 'none'
+      setStep(1)
+      appendLog(`发起${currentMode === 'sms' ? '验证码' : '密码'}登录请求...`, 'info')
+
+      try {
+        const res = await login(loginParams)
+
+        if (res.code === 8830) {
+          stage2Box.style.display = 'block'
+          appendLog('触发二阶段风控 (8830)，请点击「发送验证码」并输入验证码完成登录。', 'warn')
+        } else if (res.code === 200) {
+          stage2Box.style.display = 'none'
+          cookieBox.style.display = 'block'
+          cookieText.textContent = res.loginCookie || (res.cookie ? res.cookie.slice(0, 120) + '...' : '')
+          setStep(4)
+          appendLog('登录成功！已获取完整会话 Cookie。', 'success')
+        } else {
+          appendLog(`登录结果: ${res.msg || res.message || '登录失败'} (code: ${res.code})`, 'error')
+        }
+      } catch (err) {
+        appendLog('请求异常: ' + err.message, 'error')
+      } finally {
+        btnLogin.disabled = false
+      }
+    })
+
+    // 提交二阶段短信验证码登录
+    btnSubmitCaptcha.addEventListener('click', async () => {
+      const phone = phoneInput.value.trim()
+      const captcha = captchaInput.value.trim()
+      const sid = sidInput.value.trim()
+
+      if (!captcha) {
+        alert('请输入收到的 6 位短信验证码')
+        return
+      }
+
+      btnSubmitCaptcha.disabled = true
+      appendLog('提交二阶段短信验证码登录...', 'info')
+
+      try {
+        const res = await login({
+          phone,
+          captcha,
+          sid,
+        })
+
+        if (res.code === 200) {
+          setStep(4)
+          stage2Box.style.display = 'none'
+          cookieBox.style.display = 'block'
+          cookieText.textContent = res.loginCookie || (res.cookie ? res.cookie.slice(0, 120) + '...' : '')
+          appendLog('二阶段验证成功，登录完成！', 'success')
+        } else {
+          appendLog(`二阶段验证失败: ${res.msg || res.message} (code: ${res.code})`, 'error')
+        }
+      } catch (e) {
+        appendLog('提交验证码请求失败: ' + e.message, 'error')
+      } finally {
+        btnSubmitCaptcha.disabled = false
+      }
+    })
+
+    // 放弃二阶段重置
+    btnRestart.addEventListener('click', async () => {
+      const phone = phoneInput.value.trim()
+      const sid = sidInput.value.trim()
+      appendLog('放弃二阶段状态，重置当前会话...', 'warn')
+      await login({ phone, password: 'x', sid, restart: true }).catch(() => {})
+      stage2Box.style.display = 'none'
+      setStep(1)
+      appendLog('会话二阶段已重置。', 'info')
+    })
+
+    // 复制 Cookie
+    btnCopyCookie.addEventListener('click', () => {
+      navigator.clipboard.writeText(cookieText.textContent).then(() => {
+        alert('Cookie 已复制到剪贴板！')
+      })
+    })
+
+    appendLog('易盾登录体验页面已就绪。支持账号密码或短信验证码登录测试！', 'info')
+  </script>
+</body>
+</html>
