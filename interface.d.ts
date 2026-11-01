@@ -271,6 +271,10 @@ export function artist_songs(
     RequestBaseConfig,
 ): Promise<Response>
 
+export function artist_songs_v2(
+  params: { id: string | number } & MultiPageConfig & RequestBaseConfig,
+): Promise<Response>
+
 export function artist_sub(
   params: { id: string | number; t: SubAction } & RequestBaseConfig,
 ): Promise<Response>
@@ -635,6 +639,19 @@ export function dj_program(
     asc: 'true' | 1 | 'false' | 0
   } & MultiPageConfig &
     RequestBaseConfig,
+): Promise<Response>
+
+export function dj_program_v6(
+  params: {
+    radioId?: string | number
+    rid?: string | number
+    asc?: boolean | string
+    updateOrder?: boolean | string
+  } & MultiPageConfig & RequestBaseConfig,
+): Promise<Response>
+
+export function djradio_my_radio_recommend(
+  params: { limit?: string | number } & RequestBaseConfig,
 ): Promise<Response>
 
 export function dj_program_detail(
@@ -2528,6 +2545,40 @@ export function search_match(
   } & RequestBaseConfig,
 ): Promise<Response>
 
+export function search_album_v1(
+  params: { s: string; queryCorrect?: boolean | string } & MultiPageConfig & RequestBaseConfig,
+): Promise<Response>
+
+export function search_artist_v1(
+  params: { s: string; queryCorrect?: boolean | string } & MultiPageConfig & RequestBaseConfig,
+): Promise<Response>
+
+export function search_playlist_v1(
+  params: { s: string; queryCorrect?: boolean | string } & MultiPageConfig & RequestBaseConfig,
+): Promise<Response>
+
+export function search_default_pc(params: RequestBaseConfig): Promise<Response>
+
+export function search_pc_complex_page_v3(
+  params: {
+    keyword: string
+    scene?: string
+    needCorrect?: boolean | string
+    channel?: string
+    bizQueryInfo?: string
+  } & RequestBaseConfig,
+): Promise<Response>
+
+export function search_song_list_page(
+  params: {
+    keyword?: string
+    keywords?: string
+    scene?: string
+    needCorrect?: boolean | string
+    channel?: string
+  } & MultiPageConfig & RequestBaseConfig,
+): Promise<Response>
+
 export function search_suggest_pc(
   params: {
     keyword: string
@@ -2825,6 +2876,10 @@ export function vip_tasks_v1(
   } & RequestBaseConfig,
 ): Promise<Response>
 
+export function content_my_liked_voice(
+  params: MultiPageConfig & RequestBaseConfig,
+): Promise<Response>
+
 export function voice_detail(
   params: {
     id: string | number
@@ -2854,6 +2909,14 @@ export function voice_upload(
     orderNo?: string | number
     composedSongs?: string
   } & RequestBaseConfig,
+): Promise<Response>
+
+export function pc_voicelist_rcmd_list(
+  params: { limit?: string | number } & RequestBaseConfig,
+): Promise<Response>
+
+export function voicelist_my_subscribed(
+  params: { limit?: string | number } & RequestBaseConfig,
 ): Promise<Response>
 
 export function voicelist_detail(
