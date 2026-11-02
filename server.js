@@ -55,76 +55,40 @@ const VERSION_CHECK_RESULT = {
  */
 
 /**
- * Get the module definitions dynamically (Recursive version)
+ * Get the module definitions dynamically.
  *
  * @param {string} modulesPath The path to modules (JS).
  * @param {Record<string, string>} [specificRoute] The specific route of specific modules.
  * @param {boolean} [doRequire] If true, require() the module directly.
+ * Otherwise, print out the module path. Default to true.
  * @returns {Promise<ModuleDefinition[]>} The module definitions.
+ *
+ * @example getModuleDefinitions("./module", {"album_new.js": "/album/create"})
  */
 async function getModulesDefinitions(
   modulesPath,
   specificRoute,
   doRequire = true,
 ) {
-  const modules = []
+  const files = await fs.promises.readdir(modulesPath)
+  const parseRoute = (/** @type {string} */ fileName) =>
+    specificRoute && fileName in specificRoute
+      ? specificRoute[fileName]
+      : `/${fileName.replace(/\.js$/i, '').replace(/_/g, '/')}`
 
-  /**
-   * 递归扫描目录内部函数
-   * 我们按照 Next.js 的路由结构来实现改造我们的模块系统
-   *  - 目录即路由前缀，文件即路由路径
-   *  - 例如 module/playlist/detail.js 对应 /playlist/detail 路由
-   *  - 目录名中的下划线会被转换成斜杠，例如 module/user/_info.js 对应 /user/info 路由
-   *  - 特例：如果目录名被括号包裹，例如 module/(search)/index.js，对应 /search 路由（即括号内的内容会被忽略）
-   * NOTE: 我暂且不动原先的文件，我的项目已经使用了，一动我的前端算是白写了
-   * @param {string} currentDir 当前所在的物理目录路径
-   * @param {string} basePrefix 累加的 URL 路由前缀
-   */
-  async function scanDir(currentDir, basePrefix = '/') {
-    const files = await fs.promises.readdir(currentDir)
+  const modules = files
+    .reverse()
+    .filter((file) => file.endsWith('.js'))
+    .map((file) => {
+      const identifier = file.split('.').shift()
+      const route = parseRoute(file)
+      const modulePath = path.join(modulesPath, file)
+      const module = doRequire ? require(modulePath) : modulePath
 
-    for (const file of files) {
-      const fullPath = path.join(currentDir, file)
-      const stat = await fs.promises.stat(fullPath)
+      return { identifier, route, module }
+    })
 
-      if (stat.isDirectory()) {
-        // 判断是否是路由组，例如 "(search)"
-        const isGroup = file.startsWith('(') && file.endsWith(')')
-
-        // 工程化细节：URL 路径拼接必须用 path.posix.join，防止在 Windows 下生成 \ 斜杠
-        const nextPrefix = isGroup
-          ? basePrefix
-          : path.posix.join(basePrefix, file)
-
-        // 递归进入子目录
-        await scanDir(fullPath, nextPrefix)
-      } else if (file.endsWith('.js')) {
-        const identifier = file.split('.').shift()
-        let route
-
-        // 1. 优先检查是否有特殊写死的路由映射
-        if (specificRoute && file in specificRoute) {
-          route = specificRoute[file]
-        } else {
-          // 2. 正常处理逻辑：文件名下划线转斜杠
-          const fileRoutePath = identifier.replace(/_/g, '/')
-          // 将文件夹前缀和文件路由拼接，并确保多余的斜杠被清理
-          route = path.posix.join(basePrefix, fileRoutePath)
-        }
-
-        const moduleDef = doRequire ? require(fullPath) : fullPath
-
-        // 将结果推入数组，保持和原先一样的数据结构
-        modules.push({ identifier, route, module: moduleDef })
-      }
-    }
-  }
-
-  // 从根目录开始执行扫描
-  await scanDir(modulesPath)
-
-  // 保持原有的逆序习惯
-  return modules.reverse()
+  return modules
 }
 
 /**
@@ -368,12 +332,20 @@ async function constructServer(moduleDefs) {
           if (options.randomCNIP) {
             ip = global.cnIp
           } else {
-            ip = req.ip
+            ip = req.ip || ''
 
             if (ip.substring(0, 7) == '::ffff:') {
               ip = ip.substring(7)
             }
-            if (ip == '::1') {
+            if (
+              !ip ||
+              ip === '::1' ||
+              ip === '127.0.0.1' ||
+              ip.startsWith('127.') ||
+              ip.startsWith('192.168.') ||
+              ip.startsWith('10.') ||
+              ip.startsWith('172.')
+            ) {
               ip = global.cnIp
             }
           }

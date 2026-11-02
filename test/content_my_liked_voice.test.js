@@ -1,6 +1,6 @@
 const assert = require('assert')
 const path = require('path')
-const likedVoices = require('../module/(voice)/content_my_liked_voice')
+const likedVoices = require('../module/content_my_liked_voice')
 const { getModulesDefinitions } = require('../server')
 
 function captureRequest() {

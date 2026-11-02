@@ -1,6 +1,6 @@
 const assert = require('assert')
 const path = require('path')
-const recommendedRadios = require('../module/(dj)/djradio_my_radio_recommend')
+const recommendedRadios = require('../module/djradio_my_radio_recommend')
 const { getModulesDefinitions } = require('../server')
 
 function captureRequest() {

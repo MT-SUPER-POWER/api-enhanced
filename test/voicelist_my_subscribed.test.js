@@ -1,6 +1,6 @@
 const assert = require('assert')
 const path = require('path')
-const subscribedVoiceLists = require('../module/(voice)/voicelist_my_subscribed')
+const subscribedVoiceLists = require('../module/voicelist_my_subscribed')
 const { getModulesDefinitions } = require('../server')
 
 function captureRequest() {

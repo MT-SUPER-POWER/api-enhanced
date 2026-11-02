@@ -93,7 +93,7 @@ const refreshNeapiKey = (version) => {
 const osMap = {
   pc: {
     os: 'pc',
-    appver: '3.1.17.204416',
+    appver: '3.1.29.205117',
     osver: 'Microsoft-Windows-10-Professional-build-19045-64bit',
     channel: 'netease',
   },
@@ -410,7 +410,7 @@ const createRequest = async (uri, data, options) => {
         if (options.checkToken) header['X-antiCheatToken'] = token
         if (crypto === 'eapi' && cookie.NMTID) header['NMTID'] = cookie.NMTID
 
-        headers['Cookie'] = createHeaderCookie(header)
+        headers['Cookie'] = createHeaderCookie({ ...cookie, ...header })
         headers['User-Agent'] =
           options.ua ||
           (cookie.os === 'osx'

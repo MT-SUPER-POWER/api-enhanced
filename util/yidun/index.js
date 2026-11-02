@@ -6,7 +6,7 @@ const PC_UA =
 
 const PC_ID = {
   os: 'pc',
-  appver: '3.1.17.204416',
+  appver: '3.1.29.205117',
   osver: 'Microsoft-Windows-10-Professional-build-19045-64bit',
   channel: 'netease',
 }
