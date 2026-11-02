@@ -368,12 +368,20 @@ async function constructServer(moduleDefs) {
           if (options.randomCNIP) {
             ip = global.cnIp
           } else {
-            ip = req.ip
+            ip = req.ip || ''
 
             if (ip.substring(0, 7) == '::ffff:') {
               ip = ip.substring(7)
             }
-            if (ip == '::1') {
+            if (
+              !ip ||
+              ip === '::1' ||
+              ip === '127.0.0.1' ||
+              ip.startsWith('127.') ||
+              ip.startsWith('192.168.') ||
+              ip.startsWith('10.') ||
+              ip.startsWith('172.')
+            ) {
               ip = global.cnIp
             }
           }
