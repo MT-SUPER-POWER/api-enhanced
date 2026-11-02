@@ -1234,6 +1234,24 @@ tags: 歌单标签
 
 **调用例子 :** `/artist/songs?id=6452`
 
+### 歌手全部歌曲 - V2
+
+说明 : 调用网易 V2 歌手歌曲接口，获取歌手的全部歌曲。与 `/artist/songs` 分开保留，版本号对应实际上游接口版本。
+
+**必选参数 :**
+
+`id` : 歌手 id
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 100
+
+`offset` : 偏移量，默认 0
+
+**接口地址 :** `/artist/songs/v2`
+
+**调用例子 :** `/artist/songs/v2?id=6452&limit=100&offset=0`
+
 ### 收藏的歌手列表
 
 说明 : 调用此接口,可获取收藏的歌手列表
@@ -3474,6 +3492,40 @@ type='1009' 获取其 id, 如`/search?keywords= 代码时间 &type=1009`
 
 **调用例子 :** `/dj/program?rid=336355127&limit=40` ( 对应 ' 代码时间 ' 的节目列表 )
 
+### 电台 - 节目 V6
+
+说明 : 获取电台节目列表，使用网易 V6 接口，包含登录用户的节目收听记录。
+
+**必选参数 :**
+
+`radioId` : 电台 id，也可使用 `rid`
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 30
+
+`offset` : 偏移量，默认 0
+
+`asc` : 是否升序，默认 false
+
+`updateOrder` : 是否使用更新顺序，默认 true
+
+**接口地址 :** `/dj/program/v6`
+
+**调用例子 :** `/dj/program/v6?radioId=336355127&limit=30&offset=0`
+
+### 我的播客推荐
+
+说明 : 登录后获取面向当前用户的播客推荐。
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 6
+
+**接口地址 :** `/djradio/my/radio/recommend`
+
+**调用例子 :** `/djradio/my/radio/recommend?limit=6`
+
 ### 电台 - 节目详情
 
 说明 : 调用此接口传入电台节目 id,可获得电台节目详情
@@ -5455,9 +5507,103 @@ let data = encodeURIComponent(
 `offset` : 偏移量
 `scene` : 场景, 默认 normal
 
+`needCorrect` : 可选搜索纠错参数，仅在传入时透传
+
+`channel` : 可选输入来源，例如 typing，仅在传入时透传
+
 **接口地址 :** `/search/song/list/page`
 
 **调用例子 :** `/search/song/list/page?keyword=如果呢&limit=30`
+
+### 专辑搜索 - V1
+
+说明 : 使用网易 V1 专辑搜索接口，参数名为 `s`。
+
+**必选参数 :**
+
+`s` : 搜索关键词
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 10
+
+`offset` : 偏移量，默认 0
+
+`queryCorrect` : 搜索纠错参数，默认 true
+
+**接口地址 :** `/search/album/v1`
+
+**调用例子 :** `/search/album/v1?s=周杰伦&limit=10&offset=0`
+
+### 歌手搜索 - V1
+
+说明 : 使用网易 V1 歌手搜索接口，参数名为 `s`。
+
+**必选参数 :**
+
+`s` : 搜索关键词
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 10
+
+`offset` : 偏移量，默认 0
+
+`queryCorrect` : 搜索纠错参数，默认 true
+
+**接口地址 :** `/search/artist/v1`
+
+**调用例子 :** `/search/artist/v1?s=周杰伦&limit=10&offset=0`
+
+### 歌单搜索 - V1
+
+说明 : 使用网易 V1 歌单搜索接口，参数名为 `s`。
+
+**必选参数 :**
+
+`s` : 搜索关键词
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 10
+
+`offset` : 偏移量，默认 0
+
+`queryCorrect` : 搜索纠错参数，默认 true
+
+**接口地址 :** `/search/playlist/v1`
+
+**调用例子 :** `/search/playlist/v1?s=周杰伦&limit=10&offset=0`
+
+### 默认搜索关键词 - PC 端
+
+说明 : 获取 PC 端推荐的默认搜索关键词，无需业务参数。
+
+**接口地址 :** `/search/default/pc`
+
+**调用例子 :** `/search/default/pc`
+
+### 综合搜索 - PC 端 V3
+
+说明 : 使用网易 PC 端 V3 综合搜索页面接口。
+
+**必选参数 :**
+
+`keyword` : 搜索关键词
+
+**可选参数 :**
+
+`scene` : 场景，默认 normal
+
+`needCorrect` : 搜索纠错参数，默认 true
+
+`channel` : 输入来源，默认 typing
+
+`bizQueryInfo` : 业务查询信息，默认空字符串
+
+**接口地址 :** `/search/pc/complex/page/v3`
+
+**调用例子 :** `/search/pc/complex/page/v3?keyword=周杰伦`
 
 ### 按歌词搜索
 
@@ -5550,6 +5696,44 @@ let data = encodeURIComponent(
 **接口地址 :** `/song/like`
 
 **调用例子 :** `/song/like?id=2058263032&uid=32953014&like=true`
+
+### 我订阅的播客声音
+
+说明 : 登录后获取当前用户订阅的播客声音列表。
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 200
+
+**接口地址 :** `/voicelist/my/subscribed`
+
+**调用例子 :** `/voicelist/my/subscribed?limit=200`
+
+### 我喜欢的播客声音
+
+说明 : 登录后获取当前用户喜欢的播客声音，支持分页。
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 200
+
+`offset` : 偏移量，默认 0
+
+**接口地址 :** `/content/my/liked/voice`
+
+**调用例子 :** `/content/my/liked/voice?limit=200&offset=0`
+
+### 推荐播客声音列表 - PC 端
+
+说明 : 获取 PC 端推荐的播客声音列表。
+
+**可选参数 :**
+
+`limit` : 返回数量，默认 12
+
+**接口地址 :** `/pc/voicelist/rcmd/list`
+
+**调用例子 :** `/pc/voicelist/rcmd/list?limit=12`
 
 ### 我创建的播客声音
 
@@ -6196,50 +6380,6 @@ let data = encodeURIComponent(
 **接口地址 :** `/recommend/category/config`
 
 **调用例子 :** `/recommend/category/config?tags=10004,10015&categoryId=1000`
-
-### 获取用户乐迷团列表
-
-说明 : 登录后调用此接口 , 可获取当前登录用户已加入的全部歌手乐迷团列表
-
-**接口地址 :** `/fans/group/user/groups`
-
-**调用例子 :** `/fans/group/user/groups`
-
-### 获取乐迷团详情
-
-说明 : 调用此接口 , 可获取乐迷团详情
-
-**必选参数 :** `groupId` : 乐迷团 ID
-
-**可选参数 :** `scene` : 场景标识
-
-**接口地址 :** `/fans/group/detail`
-
-**调用例子 :** `/fans/group/detail?groupId=1872529203038486609`
-
-### 获取用户在乐迷团的详情
-
-说明 : 登录后调用此接口 , 可获取当前用户在指定乐迷团的详细成员信息及铭牌等级
-
-**必选参数 :** `groupId` : 乐迷团 ID
-
-**接口地址 :** `/fans/group/user/group/detail`
-
-**调用例子 :** `/fans/group/user/group/detail?groupId=1755777360858267711`
-
-### 获取乐迷团推荐笔记
-
-说明 : 调用此接口 , 可获取指定乐迷团的推荐笔记
-
-**必选参数 :** `fansGroupId` : 乐迷团 ID
-
-**可选参数 :** `cursor` : 游标 , 默认为 0
-
-`size` : 返回数量 , 默认为 10
-
-**接口地址 :** `/fans/group/feed/recommend`
-
-**调用例子 :** `/fans/group/feed/recommend?fansGroupId=1872529203038486609&size=10&cursor=0`
 
 ## 离线访问此文档
 

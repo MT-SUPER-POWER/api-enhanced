@@ -7,6 +7,8 @@ module.exports = (query, request) => {
     limit: query.limit || 30,
     offset: query.offset || 0,
     scene: query.scene || 'normal',
+    ...(query.needCorrect === undefined ? {} : { needCorrect: query.needCorrect }),
+    ...(query.channel === undefined ? {} : { channel: query.channel }),
   }
   return request(
     `/api/search/song/list/page`,

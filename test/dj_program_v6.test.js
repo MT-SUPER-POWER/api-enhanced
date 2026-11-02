@@ -1,6 +1,6 @@
 const assert = require('assert')
 const path = require('path')
-const getDjProgramsV6 = require('../module/(dj)/dj_program_v6')
+const getDjProgramsV6 = require('../module/dj_program_v6')
 const { getModulesDefinitions } = require('../server')
 
 function captureRequest() {
